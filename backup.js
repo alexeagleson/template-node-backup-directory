@@ -1,6 +1,18 @@
 require("dotenv").config();
 const CronJob = require("cron").CronJob;
 const Rsync = require("rsync");
+const https = require("https");
+
+process.title = "node-backup-script";
+
+const options = {
+  hostname: "discord.com",
+  path: `/api/webhooks/${process.env.WEBHOOK_ID}`,
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
 
 // process.platform will be:
 // Windows: win32
@@ -24,9 +36,29 @@ const job = new CronJob(
   process.env.CRON_STRING,
   () => {
     rsync.execute((error, code, cmd) => {
-      // List of rsync status codes
-      // https://stackoverflow.com/a/20738063
-      console.log("backup completed with status code: " + code);
+
+      // Send the request to Discord with the configured options
+      const req = https.request(options, (res) => {
+        // do nothing with Discord response
+      });
+
+      let result;
+      if (error) {
+        // List of rsync status codes
+        // https://stackoverflow.com/a/20738063
+        result = `Code ${code} ${error?.message}`;
+      } else {
+        result = "Backup complete";
+      }
+
+      // Discord requires a { content: string } shape for posting messages
+      req.write(
+        JSON.stringify({
+          content: result,
+        })
+      );
+
+      req.end();
     });
   },
   null,
