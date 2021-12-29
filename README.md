@@ -2,11 +2,44 @@
 
 How to use Node.js to schedule regular folder backups, and learn some webdev skills along the way
 
+All code from this tutorial as a complete package is available in [this repository](https://github.com/alexeagleson/template-node-backup-directory).  If you find this tutorial helpful, please share it with your friends and colleagues!
+
+For more tutorials like this, follow me <a href="https://twitter.com/eagleson_alex?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">@eagleson_alex</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> on Twitter
+
+## How to Use
+
+If you want to try it out first the follow the instructions below.  
+
+If you want to create your own version of the app, begin in the [introduction](#introduction) section.
+
+This app will work on both Mac/Linux (Bash) and Windows (PowerShell).
+
+1. Clone the project from  [this repository](https://github.com/alexeagleson/template-node-backup-directory)
+2. Run `npm install` from the project directory
+3. Create a `.env` file in the root with the following structure:
+
+```
+SOURCE_DIR="example-source/"
+DESTINATION_DIR="example-destination/"
+CRON_STRING="* * * * * *"
+WEBHOOK_ID="DISCORD_WEBHOOK_ID"
+```
+
+Update `SOURCE_DIR` to be the directory you want to copy, and `DESTINATION_DIR` where you want to synchronize.  
+
+Edit `CRON_STRING` to determine the schedule the copying occurs on.  If you are not familiar with cron strings use [this tool](https://crontab.guru/) to help you create one.  
+
+The `DISCORD_WEBHOOK_ID` is optional.  If you don't use it it will not impact the app.  If you do use it you remove the `https://discord.com/api/webhooks/` portion of the webhook URLm the remainder is the `DISCORD_WEBHOOK_ID`.
+
+4. Run the app with `node backup.js`.  
+
+If you plan to run it as a long-term background process you can use PM2 which is described in the [Running as a Background Process](#running-as-a-background-process) section.
+
 ## Introduction
 
 Like many other people out there, I have quite a few assorted documents and photos that are rather important to me. Although I know I have at least one copy of these locally and I use Dropbox as cloud storage, I'll admit I don't meet the coveted [3-2-1 backup strategy](https://www.backblaze.com/blog/the-3-2-1-backup-strategy/) requirements.
 
-Over the holiday I received a new 4TB hard drive and with it, a renewed interest in backing up my data (at least the important stuff like pictures of my kids and financial records; even in the worst case scenario I could probably replace my Star Trek TNG bluray rips).
+Over the holiday I received a new 4TB hard drive and with it, a renewed interest in backing up my data (at least the important stuff like pictures of my kids and financial records; even in the worst case scenario I could probably replace my Star Trek TNG blu-ray rips).
 
 So with that in mind, I decided to combine it with an exercise that dives a bit further than I usually go into the Node.js ecosystem.
 
@@ -67,7 +100,7 @@ Next I need to deal with what happens when I close the lid.  Unfortunately I don
 sudo gedit /etc/systemd/logind.conf
 ```
 
-And change the following value from the dfault to `ignore`:
+And change the following value from the default to `ignore`:
 
 ```
 HandleLidSwitch=ignore
