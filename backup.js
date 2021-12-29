@@ -5,6 +5,9 @@ const https = require("https");
 
 process.title = "node-backup-script";
 
+// Will be true if there is a Discord WEBHOOK_ID set in the `.env` file
+const useDiscord = !!process.env.WEBHOOK_ID;
+
 const options = {
   hostname: "discord.com",
   path: `/api/webhooks/${process.env.WEBHOOK_ID}`,
@@ -14,7 +17,7 @@ const options = {
   },
 };
 
-// process.platform will be:
+// The value of process.platform will be:
 // Windows: win32
 // Mac: darwin
 // Ubuntu: linux
@@ -36,12 +39,6 @@ const job = new CronJob(
   process.env.CRON_STRING,
   () => {
     rsync.execute((error, code, cmd) => {
-
-      // Send the request to Discord with the configured options
-      const req = https.request(options, (res) => {
-        // do nothing with Discord response
-      });
-
       let result;
       if (error) {
         // List of rsync status codes
@@ -51,14 +48,27 @@ const job = new CronJob(
         result = "Backup complete";
       }
 
-      // Discord requires a { content: string } shape for posting messages
-      req.write(
-        JSON.stringify({
-          content: result,
-        })
-      );
+      const currentDate = new Date().toISOString();
+      // Write log to the console, or will be redirected to a
+      // nohup.out file if using nohup
+      process.stdout.write(`${currentDate}: ${result}\n`);
 
-      req.end();
+      // Only sends the request if WEBHOOK_ID is defined
+      if (useDiscord) {
+        // Send the request to Discord with the configured options
+        const req = https.request(options, (res) => {
+          // do nothing with Discord response
+        });
+
+        // Discord requires a { content: string } shape for posting messages
+        req.write(
+          JSON.stringify({
+            content: result,
+          })
+        );
+
+        req.end();
+      }
     });
   },
   null,
