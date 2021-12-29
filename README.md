@@ -1,18 +1,55 @@
-
-
-How to use Node.js to schedule regular folder backups, and learn some webdev skills along the way
-
 All code from this tutorial as a complete package is available in [this repository](https://github.com/alexeagleson/template-node-backup-directory).  If you find this tutorial helpful, please share it with your friends and colleagues!
 
 For more tutorials like this, follow me <a href="https://twitter.com/eagleson_alex?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">@eagleson_alex</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> on Twitter
 
-## How to Use
+## Introduction
 
-If you want to try it out first the follow the instructions below.  
+Like many other people out there, I have quite a few digital documents and pictures that are important to me. 
 
-If you want to create your own version of the app, begin in the [introduction](#introduction) section.
+Although I know I have at least one copy of these locally, and I do use Dropbox as cloud storage; I'll freely admit I don't meet the coveted [3-2-1 backup strategy](https://www.backblaze.com/blog/the-3-2-1-backup-strategy/) standards 😳.
 
-This app will work on both Mac/Linux (Bash) and Windows (PowerShell).
+Over the holidays I received a new 4TB hard drive and with it, a renewed interest in backing up my data (at least the important stuff like pictures of my kids, and financial records.  I _guess_ in the worst case scenario, I could probably replace my Star Trek TNG blu-ray rips; so I'll keep those separate for now).
+
+With that in mind, I decided to combine it with an exercise that dives a bit further than I usually go into the Node.js ecosystem.
+
+This tutorial is the result of that exploration, and the result is a little tool for synchronizing backup copies of any directory on your machine. As a bonus we're going to configure it to support Linux, Mac and Windows.
+
+Before we begin I will give a little warning that this is primarily meant as a learning experience and is **_absolutely not meant to be the best backup solution_**.  
+
+If you're serious about remote storage then something like [Google Drive](https://www.google.com/intl/en_ca/drive/) will get the job done for you. For local backups setting up a [RAID drive](https://en.wikipedia.org/wiki/RAID) will cover your ass better than this little backup app will.
+
+That said, those options are a lot less **_fun_** so if you're willing to use this as a learning opportunity to practice your Node.js skills, and get some bonus scheduled backups out of it, I think you'll find this to be a really interesting tutorial.  
+
+## Table of Contents
+
+1. [What You Will Learn](#what-you-will-learn)
+1. [Try it Out (Optional)](#try-it-out-optional)
+1. [Configuring Your Machine (Optional)](#configuring-your-machine-optional)
+1. [Creating the Project](#creating-the-project)
+1. [Cross Platform Support](#cross-platform-support)
+1. [Running as a Background Process](#running-as-a-background-process)
+1. [Adding a Discord Webhook (Bonus)](#adding-a-discord-webhook-bonus)
+1. [Wrapping Up](#wrapping-up)
+
+## What You Will Learn
+
+* Common Linux tools like `rsync` (copying files locally and over SSH), `cron` (scheduling tasks on a specific interval) and `nohup` (run something as a background process that doesn't stop when the terminal session is ended)
+
+* Running Node (Javascript) apps as background processes, including automatic reboot on crash using `pm2`, a production viable tool for Node.js servers.
+
+* More about the different values available on the `process` object in Node.js including `title` and `platform`
+
+* Create an app that behaves differently depending on which OS it's running on and works on both Bash (Mac/Linux) and Microsoft PowerShell (Windows)
+
+* Send messages to a webhook with HTTP POST requests, in our example that webhook will be a Discord bot
+
+## Try it Out (Optional)
+
+If you want to try it out first, then follow the instructions below. If you want to jump into creating your own version, then skip this section.
+
+This app will work on both Mac/Linux (Bash) and Windows (PowerShell).  
+
+All you need installed are `git` and `nodejs`.  
 
 1. Clone the project from  [this repository](https://github.com/alexeagleson/template-node-backup-directory)
 2. Run `npm install` from the project directory
@@ -34,34 +71,6 @@ The `DISCORD_WEBHOOK_ID` is optional.  If you don't use it it will not impact th
 4. Run the app with `node backup.js`.  
 
 If you plan to run it as a long-term background process you can use PM2 which is described in the [Running as a Background Process](#running-as-a-background-process) section.
-
-## Introduction
-
-Like many other people out there, I have quite a few assorted documents and photos that are rather important to me. Although I know I have at least one copy of these locally and I use Dropbox as cloud storage, I'll admit I don't meet the coveted [3-2-1 backup strategy](https://www.backblaze.com/blog/the-3-2-1-backup-strategy/) requirements.
-
-Over the holiday I received a new 4TB hard drive and with it, a renewed interest in backing up my data (at least the important stuff like pictures of my kids and financial records; even in the worst case scenario I could probably replace my Star Trek TNG blu-ray rips).
-
-So with that in mind, I decided to combine it with an exercise that dives a bit further than I usually go into the Node.js ecosystem.
-
-This tutorial is the result of that exploration, and the result is a little tool for synchronizing backup copies of any directory on your machine. As a bonus we're going to configure it to support Linux, Mac and Windows.
-
-Before we begin I will give a little warning that this is primarily meant as a learning experience and is **_absolutely not meant to be the best backup solution_**.  
-
-If you're serious about remote storage then something like [Google Drive](https://www.google.com/intl/en_ca/drive/) will get the job done for you. For local backups setting up a [RAID drive](https://en.wikipedia.org/wiki/RAID) will cover your ass better than this little backup app will.
-
-That said, those options are a lot less **_fun_** so if you're willing to use this as a learning opportunity to practice your Node.js skills, and get some bonus scheduled backups out of it, I think you'll find this to be a really interesting tutorial.  
-
-## What You Will Learn
-
-* Common Linux tools like `rsync` (copying files locally and over SSH), `cron` (scheduling tasks on a specific interval) and `nohup` (run something as a background process that doesn't stop when the terminal session is ended)
-
-* Running Node (Javascript) apps as background processes, including automatic reboot on crash using `pm2`, a production viable tool for Node.js servers.
-
-* More about the different values available on the `process` object in Node.js including `title` and `platform`
-
-* Create an app that behaves differently depending on which OS it's running on and works on both Bash (Mac/Linux) and Microsoft PowerShell (Windows)
-
-* Send messages to a webhook with HTTP POST requests, in our example that webhook will be a Discord bot
 
 ## Configuring Your Machine (Optional)
 
@@ -270,7 +279,7 @@ I like learning new things! I challenge myself: what do I need to do to get this
 
 Turns out it was surprisingly easy.
 
-## Adding Cross Platform Support
+## Cross Platform Support
 
 Most of our app will work fine on Windows as-is, the big challenge here is [rsync](https://en.wikipedia.org/wiki/Rsync). 
 
