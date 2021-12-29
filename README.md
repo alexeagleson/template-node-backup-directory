@@ -14,7 +14,9 @@ With that in mind, I decided to combine it with an exercise that dives a bit fur
 
 This tutorial is the result of that exploration, and the result is a little tool for synchronizing backup copies of any directory on your machine. As a bonus we're going to configure it to support Linux, Mac and Windows.
 
-Before we begin I will give a little warning that this is primarily meant as a learning experience and is **_absolutely not meant to be the best backup solution_**.  
+This is one of those posts where the biggest beneficiary in many ways is _myself_.  I wanted to try something new and simply documented my experience with learning.  It follows @swyx's philosophy of [learn in public](https://www.swyx.io/learn-in-public/) and share what you've learned with the wider community so hopefully everyone can benefit.
+
+That said, I should be very clear that this is primarily meant as a learning experience and is **_absolutely not meant to be the best backup solution_**.  
 
 If you're serious about remote storage then something like [Google Drive](https://www.google.com/intl/en_ca/drive/) will get the job done for you. For local backups setting up a [RAID drive](https://en.wikipedia.org/wiki/RAID) will cover your ass better than this little backup app will.
 
